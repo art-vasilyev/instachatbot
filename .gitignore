@@ -1,0 +1,8 @@
+config/
+scripts/
+.idea/
+*.txt
+*.checkpoint
+*.log
+*.pyc
+main.py

@@ -1,0 +1,129 @@
+import time
+import logging
+
+from instabot.api import API as InstabotAPI
+
+from instachatbot.nodes import Node, MenuNode
+
+
+class InstagramChatBot:
+    def __init__(self, menu: MenuNode = None):
+        self.logger = logging.getLogger('InstagramChatBot')
+        self._api = InstabotAPI()
+        self.menu_node = menu
+        self._last_message_timestamp = {}
+        self._start_timestamp = None
+        self.conversation = Conversation()
+
+    def login(self, username, password):
+        self._api.login(username, password)
+
+    def start(self, polling_interval=1):
+        self._start_timestamp = time.time() * 1000000
+
+        while True:
+            time.sleep(polling_interval)
+
+            # approve pending threads
+            self._api.get_pending_inbox()
+            for thread in self._api.last_json['inbox']['threads']:
+                self._api.approve_pending_thread(thread['thread_id'])
+
+            # process messages
+            self._api.getv2Inbox()
+
+            for message in self.parse_messages(self._api.last_json):
+                self.logger.debug('Got message from %s: %s',
+                                  message['from'], message['text'])
+                context = {
+                    'bot': self
+                }
+                self.handle_message(message, context)
+
+    def stop(self):
+        self._api.logout()
+
+    def parse_messages(self, body):
+        threads = body['inbox']['threads']
+        bot_user_id = self._api.user_id
+        for thread in threads:
+            if thread.get('is_group'):
+                continue
+
+            thread_id = thread['thread_id']
+            last_seen_timestamp = thread.get(
+                'last_seen_at', {}).get(
+                    str(bot_user_id), {}).get('timestamp', 0)
+            if last_seen_timestamp:
+                last_seen_timestamp = int(last_seen_timestamp)
+
+            last_seen_timestamp = max(
+                last_seen_timestamp,
+                self._last_message_timestamp.get(thread_id, 0))
+
+            items = thread.get('items')
+            users = {user['pk']: user['username'] for user in thread['users']}
+            users[body['viewer']['pk']] = body['viewer']['username']
+            for item in items:
+
+                if self._start_timestamp > item['timestamp']:
+                    continue
+                if last_seen_timestamp >= item['timestamp']:
+                    continue
+
+                self._last_message_timestamp[thread_id] = item['timestamp']
+
+                yield {
+                    'id': str(item['item_id']),
+                    'date': item['timestamp'],
+                    'type': item['item_type'],
+                    'text': item.get('text'),
+                    'from': {
+                        'id': str(item['user_id']),
+                        'username': users.get(item['user_id'])
+                    },
+                    'chat': {
+                        'id': str(thread_id),
+                        'title': thread['thread_title'],
+                        'type': thread['thread_type'],
+                    }
+
+                }
+
+    def handle_message(self, message, context):
+        chat_id = message['chat']['id']
+        state = self.conversation.get_state(chat_id) or {}
+
+        node: Node = state.get('node') or self.menu_node
+        jump = node.handle(message, state, context)
+        self.conversation.save_state(chat_id, state)
+        if jump:
+            self.handle_message(message, context)
+
+        if not state['node']:
+            self.handle_message(message, context)
+
+    def get_user_id_from_username(self, username):
+        self._api.search_username(username)
+        if "user" in self._api.last_json:
+            return str(self._api.last_json["user"]["pk"])
+        else:
+            return None
+
+    def send_direct_message(self, user_id, text):
+        logging.debug('Sending message to %s: %s', user_id, text)
+        self._api.send_direct_item(item_type='text', users=[user_id],
+                                   text=text)
+
+
+class Conversation:
+    def __init__(self, persistent=False):
+        if persistent:
+            raise NotImplementedError
+        self._conversation_state = {}
+
+    def get_state(self, chat_id):
+        return self._conversation_state.get(chat_id)
+
+    def save_state(self, chat_id, state):
+        self._conversation_state[chat_id] = state
