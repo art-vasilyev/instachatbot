@@ -15,8 +15,8 @@ class InstagramChatBot:
         self._start_timestamp = None
         self.conversation = Conversation()
 
-    def login(self, username, password):
-        self._api.login(username, password)
+    def login(self, username, password, proxy=None):
+        self._api.login(username, password, proxy=proxy)
 
     def start(self, polling_interval=1):
         self._start_timestamp = time.time() * 1000000
