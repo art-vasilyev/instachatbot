@@ -6,3 +6,4 @@ scripts/
 *.log
 *.pyc
 main.py
+!requirements.txt
