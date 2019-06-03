@@ -10,7 +10,7 @@ pip install git+https://github.com/art-vasilyev/instachatbot.git
 ## How to use
 
 Create sample script `main.py`:
-```
+```python
 from instachatbot.bot import InstagramChatBot
 from instachatbot.nodes import (
     MenuNode, MenuItem, TextNode, QuestionnaireNode, NotifyAdminNode)
