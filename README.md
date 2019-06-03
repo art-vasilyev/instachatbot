@@ -1,12 +1,13 @@
 # instachatbot
 Simple framework for building Instagram chat bots with menu driven interface
 
-## How to use
+## Installation
 
-Install requirements:
 ```
-pip install -r requirements.txt
+pip install git+https://github.com/art-vasilyev/instachatbot.git
 ```
+
+## How to use
 
 Create sample script `main.py`:
 ```
@@ -47,4 +48,9 @@ chatbot.login(
     username='<instagram-username>',
     password='<instagram-password>')
 chatbot.start()
+```
+
+Run the script:
+```
+python3.6 main.py
 ```
