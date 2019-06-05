@@ -115,3 +115,8 @@ class InstagramChatBot:
         logging.debug('Sending message to %s: %s', user_id, text)
         self._api.send_direct_item(item_type='text', users=[user_id],
                                    text=text)
+
+    def send_direct_photo(self, user_id, image_path):
+        logging.debug('Sending photo to %s: %s', user_id, image_path)
+        self._api.send_direct_item(item_type='photo', users=[user_id],
+                                   filepath=image_path)

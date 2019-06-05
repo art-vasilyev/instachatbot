@@ -48,6 +48,29 @@ class TextNode(Node):
         bot.send_direct_message(user_id=message['from']['id'], text=self.text)
 
 
+class PictureNode(Node):
+    """Send photo to user
+
+    Only JPG format is supported"""
+
+    def __init__(self, image_path, caption=None):
+        self.image_path = image_path
+        self.caption = caption
+
+    @property
+    def steps(self):
+        return [self.send_picture]
+
+    def send_picture(self, message, state, context):
+        bot = context['bot']
+        bot.send_direct_photo(
+            user_id=message['from']['id'],
+            image_path=self.image_path)
+        if self.caption:
+            bot.send_direct_message(
+                user_id=message['from']['id'], text=self.caption)
+
+
 class EchoNode(Node):
     """Send message back to user"""
 
