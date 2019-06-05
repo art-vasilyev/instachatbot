@@ -4,16 +4,18 @@ import logging
 from instabot.api import API as InstabotAPI
 
 from instachatbot.nodes import Node, MenuNode
+from instachatbot.state import Conversation
+from instachatbot.storage import Storage
 
 
 class InstagramChatBot:
-    def __init__(self, menu: MenuNode = None):
+    def __init__(self, menu: MenuNode, storage: Storage = None):
         self.logger = logging.getLogger('InstagramChatBot')
         self._api = InstabotAPI()
         self.menu_node = menu
         self._last_message_timestamp = {}
         self._start_timestamp = None
-        self.conversation = Conversation()
+        self.conversation = Conversation(menu, storage)
 
     def login(self, username, password, proxy=None):
         self._api.login(username, password, proxy=proxy)
@@ -87,7 +89,6 @@ class InstagramChatBot:
                         'title': thread['thread_title'],
                         'type': thread['thread_type'],
                     }
-
                 }
 
     def handle_message(self, message, context):
@@ -114,16 +115,3 @@ class InstagramChatBot:
         logging.debug('Sending message to %s: %s', user_id, text)
         self._api.send_direct_item(item_type='text', users=[user_id],
                                    text=text)
-
-
-class Conversation:
-    def __init__(self, persistent=False):
-        if persistent:
-            raise NotImplementedError
-        self._conversation_state = {}
-
-    def get_state(self, chat_id):
-        return self._conversation_state.get(chat_id)
-
-    def save_state(self, chat_id, state):
-        self._conversation_state[chat_id] = state

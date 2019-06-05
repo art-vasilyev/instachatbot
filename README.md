@@ -54,3 +54,10 @@ Run the script:
 ```
 python3.6 main.py
 ```
+
+## Persistent conversation state
+
+By default conversation state is discarded on bot restart, to make it persistent you should provide persistent storage on bot initialization:
+```python
+chatbot = InstagramChatBot(menu=menu, storage=FileStorage())
+```
