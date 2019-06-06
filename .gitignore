@@ -1,10 +1,4 @@
-config/
-scripts/
 .idea/
 dist/
 *.egg-info
-*.txt
-*.checkpoint
-*.log
 *.pyc
-!requirements.txt

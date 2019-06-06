@@ -14,14 +14,15 @@ class InstagramChatBot:
         self._api = InstabotAPI()
         self.menu_node = menu
         self._last_message_timestamp = {}
-        self._start_timestamp = None
         self.conversation = Conversation(menu, storage)
+        self.user_id = None
 
     def login(self, username, password, proxy=None):
         self._api.login(username, password, proxy=proxy)
+        self.user_id = self._api.user_id
 
     def start(self, polling_interval=1):
-        self._start_timestamp = time.time() * 1000000
+        start_timestamp = time.time() * 1000000
 
         while True:
             time.sleep(polling_interval)
@@ -34,7 +35,8 @@ class InstagramChatBot:
             # process messages
             self._api.getv2Inbox()
 
-            for message in self.parse_messages(self._api.last_json):
+            for message in self.parse_messages(
+                    self._api.last_json, start_timestamp):
                 self.logger.debug('Got message from %s: %s',
                                   message['from'], message['text'])
                 context = {
@@ -45,9 +47,8 @@ class InstagramChatBot:
     def stop(self):
         self._api.logout()
 
-    def parse_messages(self, body):
+    def parse_messages(self, body, start_timestamp):
         threads = body['inbox']['threads']
-        bot_user_id = self._api.user_id
         for thread in threads:
             if thread.get('is_group'):
                 continue
@@ -55,7 +56,7 @@ class InstagramChatBot:
             thread_id = thread['thread_id']
             last_seen_timestamp = thread.get(
                 'last_seen_at', {}).get(
-                    str(bot_user_id), {}).get('timestamp', 0)
+                    str(self.user_id), {}).get('timestamp', 0)
             if last_seen_timestamp:
                 last_seen_timestamp = int(last_seen_timestamp)
 
@@ -68,7 +69,7 @@ class InstagramChatBot:
             users[body['viewer']['pk']] = body['viewer']['username']
             for item in items:
 
-                if self._start_timestamp > item['timestamp']:
+                if start_timestamp > item['timestamp']:
                     continue
                 if last_seen_timestamp >= item['timestamp']:
                     continue
