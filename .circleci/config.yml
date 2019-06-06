@@ -22,4 +22,4 @@ workflows:
   version: 2
   test:
     jobs:
-      - build
+      - test
