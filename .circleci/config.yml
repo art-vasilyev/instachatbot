@@ -14,7 +14,7 @@ jobs:
           command: pip install --user -r requirements.txt
       - run:
           name: run tests
-          command: pytest --cov=instachatbot
+          command: python -m pytest --cov=instachatbot
       - codecov/upload:
           file: .coverage
 
