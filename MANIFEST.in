@@ -1,3 +1,4 @@
 global-include *.py
 include requirements.txt
-prune scripts
+include LICENSE
+prune tests
