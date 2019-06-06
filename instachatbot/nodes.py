@@ -33,42 +33,38 @@ class DummyNode(Node):
         pass
 
 
-class TextNode(Node):
-    """Send text to user"""
+class MessageNode(Node):
+    """Send text or picture to user
 
-    def __init__(self, text):
+    :param text: text to send
+    :type text: str
+    :param image: filepath to JPG image
+    :type image: str
+    """
+
+    def __init__(self, text=None, image=None):
+
         self.text = text
+        self.image = image
+        if not (text or image):
+            raise ValueError('text or image required')
 
     @property
     def steps(self):
-        return [self.send_text]
+        return [self.send_message]
 
-    def send_text(self, message, state, context):
+    def send_message(self, message, state, context):
         bot = context['bot']
-        bot.send_direct_message(user_id=message['from']['id'], text=self.text)
-
-
-class PictureNode(Node):
-    """Send photo to user
-
-    Only JPG format is supported"""
-
-    def __init__(self, image_path, caption=None):
-        self.image_path = image_path
-        self.caption = caption
-
-    @property
-    def steps(self):
-        return [self.send_picture]
-
-    def send_picture(self, message, state, context):
-        bot = context['bot']
-        bot.send_direct_photo(
-            user_id=message['from']['id'],
-            image_path=self.image_path)
-        if self.caption:
+        if self.image:
+            bot.send_direct_photo(
+                user_id=message['from']['id'],
+                image_path=self.image)
+        if self.text:
             bot.send_direct_message(
-                user_id=message['from']['id'], text=self.caption)
+                user_id=message['from']['id'], text=self.text)
+
+
+TextNode = MessageNode
 
 
 class EchoNode(Node):
