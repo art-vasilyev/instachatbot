@@ -17,14 +17,14 @@ Create sample script `main.py`:
 ```python
 from instachatbot.bot import InstagramChatBot
 from instachatbot.nodes import (
-    MenuNode, MenuItem, TextNode, QuestionnaireNode, NotifyAdminNode)
+    MenuNode, MenuItem, MessageNode, QuestionnaireNode, NotifyAdminNode)
 
 menu = MenuNode(
     '💡Choose menu:\n',
     [
         MenuItem(
             'text message',
-            TextNode('This is a message😀')),
+            MessageNode('This is a message😀')),
         MenuItem(
             'questionnaire',
             QuestionnaireNode(
