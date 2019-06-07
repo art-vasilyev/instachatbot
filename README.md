@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/art-vasilyev/instachatbot.svg?style=svg)](https://circleci.com/gh/art-vasilyev/instachatbot)
 [![codecov](https://codecov.io/gh/art-vasilyev/instachatbot/branch/master/graph/badge.svg)](https://codecov.io/gh/art-vasilyev/instachatbot)
+[![PyPI version](https://badge.fury.io/py/instachatbot.svg)](https://badge.fury.io/py/instachatbot)
 
 Simple framework for building Instagram chat bots with menu driven interface
 
