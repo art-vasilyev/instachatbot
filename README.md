@@ -8,9 +8,12 @@ Simple framework for building Instagram chat bots with menu driven interface
 ## Installation
 
 ```
+pip install instachatbot
+```
+To install development version:
+```
 pip install git+https://github.com/art-vasilyev/instachatbot.git
 ```
-
 ## How to use
 
 Create sample script `main.py`:
@@ -56,7 +59,7 @@ chatbot.start()
 
 Run the script:
 ```
-python3.6 main.py
+python3 main.py
 ```
 
 ## Persistent conversation state
