@@ -14,7 +14,9 @@ class MemoryStorage(Storage):
         self._data = {}
 
     def load(self, key):
-        return self._data.get(key)
+        value = self._data.get(key)
+        if isinstance(value, dict):
+            return value.copy()
 
     def save(self, key, value):
         self._data[key] = value
