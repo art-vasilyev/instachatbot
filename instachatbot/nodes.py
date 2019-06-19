@@ -67,19 +67,6 @@ class MessageNode(Node):
 TextNode = MessageNode
 
 
-class EchoNode(Node):
-    """Send message back to user"""
-
-    @property
-    def steps(self):
-        return [self.echo]
-
-    def echo(self, message, state, context):
-        bot = context['bot']
-        bot.send_direct_message(
-            user_id=message['from']['id'], text=message['text'])
-
-
 class MenuItem:
     """Nodes wrapper for adding menu"""
 
