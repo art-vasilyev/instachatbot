@@ -1,5 +1,5 @@
 from instachatbot.bot import InstagramChatBot
-from instachatbot.nodes import MenuNode, MenuItem, MessageNode, QuestionnaireNode
+from instachatbot.nodes import MenuNode, MenuItem, MessageNode, QuestionnaireNode, DummyNode, NotifyAdminNode
 
 
 class FakeBot(InstagramChatBot):
@@ -20,6 +20,14 @@ class TestBot:
     user_id = 9912873321
     bot_id = 19501769420
     chat_id = '340282366841710300949128307236372348100'
+    username = 'user'
+
+    def build_message(self, text):
+        return {
+            'text': text,
+            'chat': {'id': self.chat_id},
+            'from': {'id': self.user_id, 'username': self.username}
+        }
 
     def test_parse_messages(self):
         timestamp = 1559826742121822
@@ -125,9 +133,54 @@ class TestBot:
         assert 'question2' in bot.messages['admin'][-1]
         assert 'answer2' in bot.messages['admin'][-1]
 
-    def build_message(self, text):
-        return {
-            'text': text,
-            'chat': {'id': self.chat_id},
-            'from': {'id': self.user_id, 'username': 'user'}
-        }
+    def test_dummy_node(self):
+        node = DummyNode()
+        menu = MenuNode('💡Menu', [MenuItem('dummy', node)])
+        bot = FakeBot(menu=menu)
+        bot.user_id = self.bot_id
+
+        message = self.build_message('test')
+        bot.handle_message(message, {'bot': bot})
+        assert len(bot.messages[self.user_id]) == 1
+        assert 'Menu' in bot.messages[self.user_id][-1]
+
+        message = self.build_message('1')
+        bot.handle_message(message, {'bot': bot})
+        assert len(bot.messages[self.user_id]) == 2
+        assert 'Menu' in bot.messages[self.user_id][-1]
+
+    def test_message_node(self):
+        node = MessageNode(text='test message')
+        menu = MenuNode('💡Menu', [MenuItem('message', node)])
+        bot = FakeBot(menu=menu)
+        bot.user_id = self.bot_id
+
+        message = self.build_message('test')
+        bot.handle_message(message, {'bot': bot})
+        assert len(bot.messages[self.user_id]) == 1
+
+        message = self.build_message('1')
+        bot.handle_message(message, {'bot': bot})
+        assert len(bot.messages[self.user_id]) == 3
+        assert 'test message' in bot.messages[self.user_id][-2]
+        assert 'Menu' in bot.messages[self.user_id][-1]
+
+    def test_notify_node(self):
+        admin_username = 'test_admin'
+        node = NotifyAdminNode(text='notification is sent',
+                               notification='notification',
+                               admin_username=admin_username)
+        menu = MenuNode('💡Menu', [MenuItem('notify', node)])
+        bot = FakeBot(menu=menu)
+        bot.user_id = self.bot_id
+
+        message = self.build_message('test')
+        bot.handle_message(message, {'bot': bot})
+        assert len(bot.messages[self.user_id]) == 1
+
+        message = self.build_message('1')
+        bot.handle_message(message, {'bot': bot})
+        assert 'notification is sent' in bot.messages[self.user_id][-2]
+        assert 'Menu' in bot.messages[self.user_id][-1]
+        assert bot.messages[admin_username][-1] == (
+            'notification\n@{}'.format(self.username))
