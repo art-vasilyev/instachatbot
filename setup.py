@@ -1,4 +1,5 @@
 import codecs
+import sys
 
 from setuptools import setup
 import instachatbot
@@ -15,6 +16,9 @@ description = (
     'Simple framework for building Instagram chat bots '
     'with menu driven interface'
 )
+
+if sys.version_info < (3, 5):
+    sys.exit('instachatbot requires Python 3.5+')
 
 setup(
     name='instachatbot',
