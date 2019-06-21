@@ -10,11 +10,11 @@ Simple framework for building Instagram chat bots with menu driven interface
 ## Installation
 
 ```
-pip install instachatbot
+pip3 install instachatbot
 ```
 To install development version:
 ```
-pip install git+https://github.com/art-vasilyev/instachatbot.git
+pip3 install git+https://github.com/art-vasilyev/instachatbot.git
 ```
 ## How to use
 
