@@ -1,4 +1,4 @@
-instabot>=0.41
+instabot==0.41
 codecov
 coverage
 pytest
