@@ -35,6 +35,6 @@ setup(
     platforms=['any'],
     license='MIT',
     install_requires=[
-        'instabot>=0.41'
+        'instabot==0.41'
     ]
 )
