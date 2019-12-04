@@ -8,25 +8,10 @@ from instachatbot.state import Conversation
 from instachatbot.storage import Storage
 
 
-class API(api.API):
-    def __init__(self, device=None, base_path=''):
-        # Setup device and user_agent
-        device = device or api.devices.DEFAULT_DEVICE
-        self.device_settings = api.devices.DEVICES[device]
-        self.user_agent = api.config.USER_AGENT_BASE.format(
-            **self.device_settings)
-        self.base_path = base_path
-        self.is_logged_in = False
-        self.last_response = None
-        self.last_json = None
-        self.total_requests = 0
-        self.logger = logging.getLogger('instabot')
-
-
 class InstagramChatBot:
     def __init__(self, menu: MenuNode, storage: Storage = None):
         self.logger = logging.getLogger('InstagramChatBot')
-        self._api = API()
+        self._api = api.API()
         self.menu_node = menu
         self._last_message_timestamp = {}
         self.conversation = Conversation(menu, storage)
@@ -48,7 +33,7 @@ class InstagramChatBot:
                 self._api.approve_pending_thread(thread['thread_id'])
 
             # process messages
-            self._api.getv2Inbox()
+            self._api.get_inbox_v2()
 
             for message in self.parse_messages(
                     self._api.last_json, start_timestamp):
