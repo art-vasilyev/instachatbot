@@ -31,10 +31,10 @@ setup(
     url='https://github.com/art-vasilyev/instachatbot',
     version=instachatbot.__version__,
     packages=['instachatbot'],
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     platforms=['any'],
     license='MIT',
     install_requires=[
-        'instabot==0.41'
+        'instabot>=0.78'
     ]
 )
