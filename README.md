@@ -90,10 +90,10 @@ menu = MenuNode(
 					MenuItem(
 						'Yes',
 						NotifyAdminNode(
-                            'Thank you',
-                            notification='Sample notification from bot user',
-                            admin_username='<username to send notification to>'
-                        )
+						    'Thank you',
+						    notification='Sample notification from bot user',
+						    admin_username='<username to send notification to>'
+						)
 					),
 					MenuItem(
 						'No',
