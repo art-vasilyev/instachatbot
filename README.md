@@ -74,3 +74,35 @@ By default a bot sends the menu on any message it receives. If you want menu to 
 ```python
 chatbot = InstagramChatBot(menu=menu, trigger='/menu')
 ```
+
+## Examples
+
+Nested menu example:
+```python
+menu = MenuNode(
+	'Main menu:\n',
+	[
+		MenuItem(
+			'Send message to admin',
+			MenuNode(
+				'Are you sure want to send message?',
+				[
+					MenuItem(
+						'Yes',
+						NotifyAdminNode(
+                            'Thank you',
+                            notification='Sample notification from bot user',
+                            admin_username='<username to send notification to>'
+                        )
+					),
+					MenuItem(
+						'No',
+						MessageNode('Canceled message sending.')
+					),
+				],
+			)
+		)
+	],
+	error_message='Failed to select menu.'
+)
+```
