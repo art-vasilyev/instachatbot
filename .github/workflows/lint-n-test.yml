@@ -3,9 +3,9 @@ name: CI
 on: [push]
 
 jobs:
-  build:
+  lint-n-test:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
     - uses: actions/checkout@v1
@@ -27,4 +27,4 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
-        pytest
+        pytest -v --cov-report=xml --cov=instachatbot tests/
