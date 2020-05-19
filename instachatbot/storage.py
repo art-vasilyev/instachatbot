@@ -13,7 +13,7 @@ class MemoryStorage(Storage):
     def __init__(self):
         self._data = {}
 
-    def load(self, key):
+    def load(self, key) -> dict:
         value = self._data.get(key)
         if isinstance(value, dict):
             return value.copy()
@@ -26,7 +26,7 @@ class FileStorage(Storage):
     def __init__(self, filepath='./conversation.db'):
         self.filepath = filepath
 
-    def load(self, key):
+    def load(self, key) -> dict:
         with shelve.open(self.filepath) as db:
             return db.get(key)
 

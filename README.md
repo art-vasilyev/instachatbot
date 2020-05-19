@@ -68,3 +68,10 @@ By default conversation state is discarded on bot restart, to make it persistent
 ```python
 chatbot = InstagramChatBot(menu=menu, storage=FileStorage())
 ```
+
+## Menu triggers
+
+By default a bot sends the menu on any message it receives. If you want menu to appear only if bot receives special message, set ``trigger`` argument on bot initialization:
+```python
+chatbot = InstagramChatBot(menu=menu, trigger='/menu')
+```
