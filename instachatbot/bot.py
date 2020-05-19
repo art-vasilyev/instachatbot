@@ -9,13 +9,14 @@ from instachatbot.storage import Storage
 
 
 class InstagramChatBot:
-    def __init__(self, menu: MenuNode, storage: Storage = None):
+    def __init__(self, menu: MenuNode, storage: Storage = None, trigger=None):
         self.logger = logging.getLogger('InstagramChatBot')
         self._api = api.API()
         self.menu_node = menu
         self._last_message_timestamp = {}
         self.conversation = Conversation(menu, storage)
         self.user_id = None
+        self.trigger = trigger
 
     def login(self, username, password, proxy=None):
         self._api.login(username, password, proxy=proxy)
@@ -97,12 +98,18 @@ class InstagramChatBot:
         state = self.conversation.get_state(chat_id) or {}
 
         node: Node = state.get('node') or self.menu_node
+        if not state:
+            # start menu only if trigger message is sent
+            if self.trigger and message.get('text') != self.trigger:
+                return
+
         jump = node.handle(message, state, context)
         self.conversation.save_state(chat_id, state)
         if jump:
             self.handle_message(message, context)
 
-        if not state['node']:
+        # show root menu again only if trigger is not required
+        if not state and not self.trigger:
             self.handle_message(message, context)
 
     def get_user_id_from_username(self, username):

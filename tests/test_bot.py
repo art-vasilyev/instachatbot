@@ -1,10 +1,12 @@
 from instachatbot.bot import InstagramChatBot
-from instachatbot.nodes import MenuNode, MenuItem, MessageNode, QuestionnaireNode, DummyNode, NotifyAdminNode
+from instachatbot.nodes import (
+    MenuNode, MenuItem, MessageNode, QuestionnaireNode, DummyNode,
+    NotifyAdminNode)
 
 
 class FakeBot(InstagramChatBot):
-    def __init__(self, menu, storage=None):
-        super(FakeBot, self).__init__(menu, storage=storage)
+    def __init__(self, menu, storage=None, trigger=None):
+        super(FakeBot, self).__init__(menu, storage=storage, trigger=trigger)
         self.messages = {}
 
     def send_direct_message(self, user_id, text):
@@ -28,6 +30,10 @@ class TestBot:
             'chat': {'id': self.chat_id},
             'from': {'id': self.user_id, 'username': self.username}
         }
+
+    def send_message(self, bot, text):
+        message = self.build_message(text)
+        bot.handle_message(message, {'bot': bot})
 
     def test_parse_messages(self):
         timestamp = 1559826742121822
@@ -84,13 +90,11 @@ class TestBot:
         state = bot.conversation.get_state(self.chat_id)
         assert state is None
 
-        message = self.build_message('test')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, 'test')
         state = bot.conversation.get_state(self.chat_id)
         assert state['node'] is menu
 
-        message = self.build_message('1')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, '1')
         state = bot.conversation.get_state(self.chat_id)
         assert state['node'] is menu
         assert 'test message' in bot.messages[self.user_id][-2]
@@ -107,25 +111,21 @@ class TestBot:
         state = bot.conversation.get_state(self.chat_id)
         assert state is None
 
-        message = self.build_message('test')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, 'test')
         state = bot.conversation.get_state(self.chat_id)
         assert state['node'] is menu
 
-        message = self.build_message('1')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, '1')
         state = bot.conversation.get_state(self.chat_id)
         assert state['node'] is question_node
         assert bot.messages[self.user_id][-1] == 'question1'
 
-        message = self.build_message('answer1')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, 'answer1')
         state = bot.conversation.get_state(self.chat_id)
         assert state['node'] is question_node
         assert bot.messages[self.user_id][-1] == 'question2'
 
-        message = self.build_message('answer2')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, 'answer2')
         state = bot.conversation.get_state(self.chat_id)
         assert state['node'] is menu
         assert 'question1' in bot.messages['admin'][-1]
@@ -139,13 +139,11 @@ class TestBot:
         bot = FakeBot(menu=menu)
         bot.user_id = self.bot_id
 
-        message = self.build_message('test')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, 'test')
         assert len(bot.messages[self.user_id]) == 1
         assert 'Menu' in bot.messages[self.user_id][-1]
 
-        message = self.build_message('1')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, '1')
         assert len(bot.messages[self.user_id]) == 2
         assert 'Menu' in bot.messages[self.user_id][-1]
 
@@ -155,12 +153,10 @@ class TestBot:
         bot = FakeBot(menu=menu)
         bot.user_id = self.bot_id
 
-        message = self.build_message('test')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, 'test')
         assert len(bot.messages[self.user_id]) == 1
 
-        message = self.build_message('1')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, '1')
         assert len(bot.messages[self.user_id]) == 3
         assert 'test message' in bot.messages[self.user_id][-2]
         assert 'Menu' in bot.messages[self.user_id][-1]
@@ -174,13 +170,49 @@ class TestBot:
         bot = FakeBot(menu=menu)
         bot.user_id = self.bot_id
 
-        message = self.build_message('test')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, 'test')
         assert len(bot.messages[self.user_id]) == 1
 
-        message = self.build_message('1')
-        bot.handle_message(message, {'bot': bot})
+        self.send_message(bot, '1')
         assert 'notification is sent' in bot.messages[self.user_id][-2]
         assert 'Menu' in bot.messages[self.user_id][-1]
         assert bot.messages[admin_username][-1] == (
             'notification\n@{}'.format(self.username))
+
+    def test_menu_trigger(self):
+        node = MessageNode(text='test message')
+        menu = MenuNode('💡Menu', [MenuItem('message', node)])
+        bot = FakeBot(menu=menu, trigger='/menu')
+        bot.user_id = self.bot_id
+
+        self.send_message(bot, 'test')
+        assert not bot.messages
+
+        self.send_message(bot, '/menu')
+        assert 'Menu' in bot.messages[self.user_id][-1]
+
+        self.send_message(bot, '1')
+        assert 'message' in bot.messages[self.user_id][-1]
+        message_count = len(bot.messages[self.user_id])
+
+        self.send_message(bot, 'test')
+        assert len(bot.messages[self.user_id]) == message_count
+
+        self.send_message(bot, 'test')
+        assert len(bot.messages[self.user_id]) == message_count
+
+        self.send_message(bot, '/menu')
+        assert len(bot.messages[self.user_id]) == message_count + 1
+
+    def test_dummy_node_with_trigger(self):
+        node = DummyNode()
+        menu = MenuNode('💡Menu', [MenuItem('dummy', node)])
+        bot = FakeBot(menu=menu, trigger='/menu')
+        bot.user_id = self.bot_id
+
+        self.send_message(bot, '/menu')
+        assert len(bot.messages[self.user_id]) == 1
+        assert 'Menu' in bot.messages[self.user_id][-1]
+
+        self.send_message(bot, '1')
+        assert len(bot.messages[self.user_id]) == 1

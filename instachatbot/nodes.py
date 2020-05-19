@@ -6,7 +6,7 @@ class Node:
     """Base node"""
     steps = ()
 
-    def handle(self, message, state, context):
+    def handle(self, message, state: dict, context):
         step_index = state.get('step') or 0
         if step_index < len(self.steps):
             step = self.steps[step_index]
@@ -17,7 +17,8 @@ class Node:
         step_index += 1
 
         if step_index >= len(self.steps):
-            state.update(node=None, step=0)
+            state.pop('node')
+            state.pop('step')
         else:
             state.update(node=self, step=step_index)
 
