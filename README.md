@@ -1,6 +1,7 @@
 # instachatbot
 
-[![PyPI version](https://badge.fury.io/py/instachatbot.svg)](https://badge.fury.io/py/instachatbot)
+![CI](https://github.com/art-vasilyev/instachatbot/workflows/CI/badge.svg)
+[![PyPI version](https://badge.fury.io/py/instachatbot.svg)](https://pypi.org/project/instachatbot/)
 
 Simple framework for building Instagram chat bots with menu driven interface
 
