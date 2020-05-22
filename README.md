@@ -1,3 +1,7 @@
+# WARNING
+
+This repository is no longer mantained. Using of Instagram bots may cause blocking of your profile.
+
 # instachatbot
 
 ![CI](https://github.com/art-vasilyev/instachatbot/workflows/CI/badge.svg)
